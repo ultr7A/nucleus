@@ -7,11 +7,11 @@ function detectOS() { return os.platform() != "win32" }
 function detectBrowsers(os) {
     return new Promise((resolve, reject) => {
         const browsers = {};
-
+        console.log("detect browsers")
         if (os) {
-            return detectUnixBrowsers(browsers).then((browsers) => browsers);
+            detectUnixBrowsers(browsers).then((browsers) => resolve(browsers));
         } else {    
-            return detectWindowsBrowsers(browsers);
+            resolve(detectWindowsBrowsers(browsers));
         }
     })
     
@@ -32,7 +32,7 @@ function detectUnixBrowsers(browsers, callback){
     return new Promise((resolve, reject) => {
         exec("which google-chrome", (err, stdout, stderr) => {
             if (err) { return; }
-            if (stdout.indexOf("/google-chrome") == > -1) {
+            if (stdout.indexOf("/google-chrome") > -1) {
                 browsers.chrome = true;
             } else {
                 return new Promise((resolve, reject) =>{
@@ -55,13 +55,12 @@ function detectUnixBrowsers(browsers, callback){
 }
 
 function windowsStart(path) {
-    const browsers = detectBrowsers(false);
-
-    console.log("get browsers for windows")
-    if (browsers.chrome) {
-        console.log("start chrome windows")
-        startChromeWindows(path);
-    }
+    detectBrowsers(false).then(browsers =>{
+        if (browsers.chrome) {
+            console.log("start chrome windows")
+            startChromeWindows(path);
+        }
+    });
 }
 function unixStart(path) {
     detectBrowsers(true).then( browsers =>{
