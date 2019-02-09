@@ -1,0 +1,27 @@
+{
+  "name": "nucleus",
+  "version": "1.0.0",
+  "description": "Nucleus | Build cross-platform desktop applications without wasting memory",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "install": "go build",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SpaceHexagon/nucleus.git"
+  },
+  "keywords": [
+    "native",
+    "app",
+    "js",
+    "desktop"
+  ],
+  "author": "Jeremy Evans <openspacehexagon@gmail.com> (https://spacehexagon.com)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/SpaceHexagon/nucleus/issues"
+  },
+  "homepage": "https://github.com/SpaceHexagon/nucleus#readme"
+}
