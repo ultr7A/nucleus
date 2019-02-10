@@ -31,5 +31,6 @@ func main() {
 	api := e.Group("/api")
 	api.GET("/read/:bucket/:key", HandleRead)
 	api.POST("/write/:bucket/:key", HandleWrite)
+	e.Static("/", "./app")
 	e.Logger.Fatal(e.Start(port))
 }
