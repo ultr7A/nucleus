@@ -1,74 +1,26 @@
 
 const { exec } = require('child_process'),
     fs = require("fs"),
-    os = require("os");
+    detect = require("./detect")
 
-main();
-
-function detectOS() { return os.platform() != "win32" }
-function detectBrowsers(os) {
-    return new Promise((resolve, reject) => {
-        const browsers = {};
-        console.log("detect browsers")
-        if (os) {
-            detectUnixBrowsers(browsers).then((browsers) => resolve(browsers));
-        } else {    
-            resolve(detectWindowsBrowsers(browsers));
+function main() {
+    const platform = detect.os(),
+        config = JSON.parse(fs.readFileSync("./nucleus.json"));
+    
+    exec(platform ? "./nucleus" : "start nucleus.exe", (err, stdout, stderr) => {
+        if (err) { return; }
+    });
+    setTimeout(()=>{
+        if (platform) {
+                unixStart(config);
+        } else {
+                windowsStart(config);
         }
-    })
-    
-}
-
-function detectWindowsBrowsers(browsers) {
-    const username = os.userInfo().username;
-
-    if (fs.existsSync("c:/Users/"+username+"/AppData/Local/Google/chrome")) {
-        browsers.chrome = true;
-    } else if (fs.existsSync("c:/Program Files/Mozilla Firefox")) {
-        browsers.firefox = true;
-    } else {
-        console.error("Error: Please install google chrome.");
-    }
-    return browsers;
-}
-
-function detectUnixBrowsers(browsers, callback){
-    return new Promise((resolve, reject) => {
-        exec("which google-chrome", (err, stdout, stderr) => {
-            if (err) { return; }
-            if (stdout.indexOf("/google-chrome") > -1) {
-                browsers.chrome = true;
-            } else {
-                return new Promise((resolve, reject) =>{
-                    exec("which chromium", (err, stdout, stderr) => {
-                        if (err) { return; }
-                        if (stdout.indexOf("/chromium") > -1) {
-                            browsers.chromium = true;   
-                        } else {
-                            return new Promise((resolve, reject) =>{
-                                exec("which firefox", (err, stdout, stderr) => {
-                                    if (err) { return; }
-                                    if (stdout.indexOf("/firefox") > -1) {
-                                        browsers.firefox = true;   
-                                    } else {
-                                        console.error("Error: Please install google chrome.");
-                                    }
-                                    resolve(browsers);
-                                });
-                            });
-                        }
-                        resolve(browsers);
-                    });
-                });
-            }
-            resolve(browsers);
-        });
-    })
-    
+    }, 350);
 }
 
 function windowsStart(config) {
-    detectBrowsers(false).then(browsers =>{
+    detect.browsers(false).then(browsers =>{
         if (browsers.chrome) {
             startChromeWindows(config);
         } else if (browsers.firefox) {
@@ -77,7 +29,7 @@ function windowsStart(config) {
     });
 }
 function unixStart(config) {
-    detectBrowsers(true).then( browsers =>{
+    detect.browsers(true).then( browsers =>{
         if (browsers.chrome) {
             startChromeUnix(config);
         }  else if (browsers.chromium) {
@@ -118,20 +70,4 @@ function startChromeUnix(config) {
     });
 }
 
-
-function main() {
-    const platform = detectOS(),
-        config = JSON.parse(fs.readFileSync("./nucleus.json"));
-
-    exec(platform ? "./nucleus" : "start nucleus.exe", (err, stdout, stderr) => {
-        if (err) { return; }
-    });
-    setTimeout(()=>{
-        if (platform) {
-            unixStart(config);
-        } else {
-            windowsStart(config);
-        }
-    }, 250)
-}
-
+main();
