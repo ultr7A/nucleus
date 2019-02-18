@@ -1,4 +1,5 @@
-const fs = require("fs"),
+const { exec, execSync } = require('child_process')
+ fs = require("fs"),
     os = require("os");
 
 module.exports = {
@@ -23,12 +24,22 @@ function detectBrowsers(os) {
 function detectWindowsBrowsers(browsers) {
     const username = os.userInfo().username;
 
-    if (fs.existsSync("c:/Users/"+username+"/AppData/Local/Google/chrome")) {
-        browsers.chrome = true;
-    } else if (fs.existsSync("c:/Program Files/Mozilla Firefox")) {
+    const FirefoxRegex = /DisplayName[\r\t\f\v |A-Z|_]+Mozilla Firefox/;
+    const ChromeRegex = /DisplayName[\r\t\f\v |A-Z|_]+Chrome/;
+    // Note: Node by default opens a CMD shell, not a powershell.
+    let win32Install = execSync("reg query HKLM\\Software\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall /s /v DisplayName").toString();
+    let win64Install = execSync("reg query HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall /s /v DisplayName").toString();
+        
+
+    if (win32Install.search(FirefoxRegex) || win64Install.search(FirefoxRegex)){
         browsers.firefox = true;
-    } else {
-        console.error("Error: Please install google chrome.");
+    }
+    if (win32Install.search(ChromeRegex) || win64Install.search(ChromeRegex)){
+        browsers.chrome = true;
+    }
+    console.log(browsers);
+    if (!(browsers.firefox || browsers.chrome)) {
+        console.error("Error: No compatible browsers detected. Please install Google Chrome.");
     }
     return browsers;
 }
